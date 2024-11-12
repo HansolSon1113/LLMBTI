@@ -8,7 +8,7 @@ import { mbtiQuestionTool, mbtiSaveTool } from "./tools/mbti";
 const tools = [timeTool, mbtiQuestionTool, mbtiSaveTool]
 
 const model = new ChatOpenAI({
-    model: "gpt-4o",
+    model: "gpt-4o-mini",
     apiKey: process.env.REACT_APP_OPENAI_API_KEY,
 });
 
