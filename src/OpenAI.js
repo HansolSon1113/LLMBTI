@@ -8,7 +8,7 @@ import { mbtiQuestionTool, mbtiSaveTool } from "./tools/mbti";
 const tools = [timeTool, mbtiQuestionTool, mbtiSaveTool]
 
 const model = new ChatOpenAI({
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     apiKey: process.env.REACT_APP_OPENAI_API_KEY,
 });
 
@@ -27,7 +27,7 @@ const prompt =
         Based on the user's initial information, talk with user.
         Start without asking.
         Original question(test problem) should be hidden.
-        Your chat should be friendly and daily, not choices.
+        You should proivde friendly and daily chat, not choices or asking all in one time.
         You can get all questions using MBTI_Question tool.
         You can save the result of the question if you can evalutate from the chat.
         If return value of MBTI_Save tool is 47, print FINISH_CHAT
