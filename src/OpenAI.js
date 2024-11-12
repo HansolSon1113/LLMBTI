@@ -21,7 +21,7 @@ const model = new ChatOpenAI({
 //         Present a daily chat that can make a result.
 //         Continue until all MBTI questions are answered. Once complete, analyze their responses and provide the user’s MBTI type.
 //     `;
-const prompt = "You are an MBTI assessment bot. Based on the user's initial information, proceed with the MBTI personality test.";
+const prompt = "You are an MBTI assessment bot. Based on the user's initial information, ask user a question to proceed MBTI test.";
 
 const checkpointer = new MemorySaver();
 
