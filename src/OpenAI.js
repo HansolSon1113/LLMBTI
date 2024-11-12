@@ -2,10 +2,12 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph/web";
+import { DuckDuckGoSearch } from "@langchain/community/tools/duckduckgo_search"
 import timeTool from "./tools/time";
 import { mbtiQuestionTool, mbtiSaveTool } from "./tools/mbti";
 
-const tools = [timeTool, mbtiQuestionTool, mbtiSaveTool]
+const DDGS = new DuckDuckGoSearch({ maxResults: 1 });
+const tools = [timeTool, mbtiQuestionTool, mbtiSaveTool, DDGS]
 
 const model = new ChatOpenAI({
     model: "gpt-4o-mini",
