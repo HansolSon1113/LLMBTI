@@ -47,7 +47,7 @@ async function Invoke(message) {
 
     // console.log(result);
     // return result.messages[-1].content;
-    const langGraphStream = await app.stream(
+    const langGraphStream = await agent.stream(
         { messages: [{ role: "user", content: message }] },
         { streamMode: "updates" }
     );
