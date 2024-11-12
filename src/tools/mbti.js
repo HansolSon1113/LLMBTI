@@ -244,7 +244,7 @@ let questions = [
     }
 ];
 
-function GetRandomQuestion() {
+function GetQuestion() {
     const randomIndex = Math.floor(Math.random() * questions.length);
     const selectedQuestion = questions[randomIndex];
     questions.splice(randomIndex, 1);
@@ -254,20 +254,20 @@ function GetRandomQuestion() {
 const mbtiQuestionSchema = z.object({
     operation: z
         .enum(["item"])
-        .describe("Gives one of MBTI test questions."),
+        .describe("Gives all MBTI test questions."),
 });
 
 const mbtiQuestionTool = tool(
     async ({ operation }) => {
         if (operation === "item") {
-            return `${GetRandomQuestion()}`;
+            return `${GetQuestion()}`;
         } else {
             throw new Error("Invalid operation.");
         }
     },
     {
         name: "MBTI_Question",
-        description: "Gives one of MBTI test questions.",
+        description: "Gives all MBTI test questions.",
         schema: mbtiQuestionSchema,
     }
 );
@@ -284,11 +284,13 @@ const mbtiSaveSchema = z.object({
     resultNumber: z.number().describe("The index of result."),
 });
 
+var i = 0;
+
 const mbtiSaveTool = tool(
     async ({ operation, questionNumber, resultNumber }) => {
         if (operation === "save") {
             SaveResult(questionNumber, resultNumber);
-            return ``;
+            return `${++i}`;
         } else {
             throw new Error("Invalid operation.");
         }
