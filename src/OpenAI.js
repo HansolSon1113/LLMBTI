@@ -48,7 +48,7 @@ async function Invoke(message) {
     );
 
     console.log(result);
-    return result.messages[-1].content;
+    return result.messages[result.messages.length - 1].content;
     
     //Debug
     // const langGraphStream = await agent.stream(
