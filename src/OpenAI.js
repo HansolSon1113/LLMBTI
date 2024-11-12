@@ -40,26 +40,26 @@ const langGraphConfig = {
 
 async function Invoke(message) {
     //Run
-    // const result = await agent.invoke(
-    //     {
-    //         messages: [{ role: "user", content: message }],
-    //     },
-    //     langGraphConfig
-    // );
-
-    // console.log(result);
-    // return result.messages[-1].content;
-    
-    //Debug
-    const langGraphStream = await agent.stream(
-        { messages: [{ role: "user", content: message }] },
-        { streamMode: "updates" },
+    const result = await agent.invoke(
+        {
+            messages: [{ role: "user", content: message }],
+        },
         langGraphConfig
     );
 
-    for await (const step of langGraphStream) {
-        console.log(step);
-    }
+    console.log(result);
+    return result.messages[-1].content;
+    
+    //Debug
+    // const langGraphStream = await agent.stream(
+    //     { messages: [{ role: "user", content: message }] },
+    //     { streamMode: "updates" },
+    //     langGraphConfig
+    // );
+
+    // for await (const step of langGraphStream) {
+    //     console.log(step);
+    // }
 }
 
 export default Invoke;
