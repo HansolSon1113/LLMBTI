@@ -5,7 +5,7 @@ import {tool} from "@langchain/core/tools";
 async function sendSearch(searchBody){
     const url = "138.2.120.185/search"
     const data = {
-        searchBody: searchBody,
+        "search": searchBody,
     };
 
     const response = await fetch(url, {

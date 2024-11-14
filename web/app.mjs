@@ -12,6 +12,7 @@ app.post('/search', async (req, res) => {
     const searchResults = await search(searchBody, {
       safeSearch: SafeSearchType.STRICT
     });
+    console.log(searchResults);
     res.send(searchResults);
   }
 })
