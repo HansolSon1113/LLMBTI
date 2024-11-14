@@ -7,6 +7,7 @@ app.use(express.json());
 
 app.post('/search', async(req, res) => {
   const searchBody = req.body.search;
+  console.log(searchBody);
   const searchResults = await search(searchBody, {
     safeSearch: SafeSearchType.STRICT
   });
