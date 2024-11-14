@@ -19,7 +19,7 @@ app.post('/search', async (req, res) => {
       }
   });
     console.log(searchResults);
-    res.send(searchResults.slice(0, 1));
+    res.send(searchResults[0]);
   }
 })
 
