@@ -19,7 +19,7 @@ app.post('/search', async (req, res) => {
       }
     });
     const firstResult = searchResults.results[0];
-    resultData = {
+    const resultData = {
       "title": firstResult.title,
       "description": firstResult.description,
       "url": firstResult.url,
