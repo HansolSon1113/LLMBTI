@@ -17,7 +17,7 @@ const timeTool = tool(
         }
     },
     {
-        name: "time",
+        name: "Time",
         description: "Gives current time.",
         schema: timeSchema,
     }
