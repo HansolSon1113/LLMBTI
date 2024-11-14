@@ -270,7 +270,7 @@ const mbtiQuestionTool = tool(
 );
 
 function SaveResult(question, result) {
-    if (question != -1) {
+    if (question !== -1) {
         console.log(`${question}: ${result}`);
     }
     else {
