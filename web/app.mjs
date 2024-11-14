@@ -5,13 +5,15 @@ const app = express()
 const port = 3000
 app.use(express.json());
 
-app.post('/search', async(req, res) => {
+app.post('/search', async (req, res) => {
   const searchBody = req.body.search;
   console.log(searchBody);
-  const searchResults = await search(searchBody, {
-    safeSearch: SafeSearchType.STRICT
-  });
-  res.send(searchResults);
+  if (searchBody != undefined) {
+    const searchResults = await search(searchBody, {
+      safeSearch: SafeSearchType.STRICT
+    });
+    res.send(searchResults);
+  }
 })
 
 app.listen(port, () => {
