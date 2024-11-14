@@ -18,8 +18,8 @@ app.post('/search', async (req, res) => {
         return url.toString();
       }
   });
-    console.log(searchResults);
-    res.send(searchResults[0]);
+    console.log(searchResults.results[0]);
+    res.send(searchResults.results[0]);
   }
 })
 
