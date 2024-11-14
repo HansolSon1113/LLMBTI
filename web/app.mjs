@@ -11,7 +11,13 @@ app.post('/search', async (req, res) => {
   if (searchBody != undefined) {
     const searchResults = await search(searchBody, {
       safeSearch: SafeSearchType.STRICT
-    });
+    }, {
+      uri_modifier: (rawUrl) => {
+        const url = new URL(rawUrl);
+        url.searchParams.delete("ss_mkt");  // remove the parameter
+        return url.toString();
+      }
+  });
     console.log(searchResults);
     res.send(searchResults);
   }
