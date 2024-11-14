@@ -245,10 +245,7 @@ let questions = [
 ];
 
 function GetQuestion() {
-    const randomIndex = Math.floor(Math.random() * questions.length);
-    const selectedQuestion = questions[randomIndex];
-    questions.splice(randomIndex, 1);
-    return selectedQuestion;
+    return questions;
 }
 
 const mbtiQuestionSchema = z.object({
@@ -272,8 +269,13 @@ const mbtiQuestionTool = tool(
     }
 );
 
-function SaveResult(question, result){
-    console.log(`${question}: ${result}`);
+function SaveResult(question, result) {
+    if (question != -1) {
+        console.log(`${question}: ${result}`);
+    }
+    else {
+        console.log("Nothing to save.");
+    }
 }
 
 const mbtiSaveSchema = z.object({
