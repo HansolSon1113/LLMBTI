@@ -17,9 +17,14 @@ app.post('/search', async (req, res) => {
         url.searchParams.delete("ss_mkt");  // remove the parameter
         return url.toString();
       }
-  });
-    console.log(searchResults.results[0]);
-    res.send(searchResults.results[0]);
+    });
+    const firstResult = searchResults.results[0];
+    resultData = {
+      "title": firstResult.title,
+      "description": firstResult.description,
+      "url": firstResult.url,
+    };
+    res.send(resultData);
   }
 })
 
