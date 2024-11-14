@@ -7,14 +7,13 @@ app.use(express.json());
 
 app.post('/search', async (req, res) => {
   const searchBody = req.body.search;
-  console.log(searchBody);
   if (searchBody != undefined) {
     const searchResults = await search(searchBody, {
       safeSearch: SafeSearchType.STRICT
     }, {
       uri_modifier: (rawUrl) => {
         const url = new URL(rawUrl);
-        url.searchParams.delete("ss_mkt");  // remove the parameter
+        url.searchParams.delete("ss_mkt");  // remove the parameter to avoid anomalies
         return url.toString();
       }
     });
@@ -29,5 +28,5 @@ app.post('/search', async (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Server is listening on ${port}`)
 })
