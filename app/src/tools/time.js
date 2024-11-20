@@ -11,7 +11,9 @@ const timeSchema = z.object({
 const timeTool = tool(
     async ({ operation }) => {
         if(operation === "current") {
-            return `${Date.now()}`;
+            // return `${Date.now()}`;
+            const now = new Date();
+            return now.toLocaleString();
         } else {
             throw new Error("Invalid operation.");
         }
