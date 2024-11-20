@@ -4,8 +4,9 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph/web";
 import timeTool from "./tools/time";
 import { mbtiQuestionTool, mbtiSaveTool } from "./tools/mbti";
+import searchTool from "./tools/search"
 
-const tools = [timeTool, mbtiQuestionTool, mbtiSaveTool]
+const tools = [timeTool, mbtiQuestionTool, mbtiSaveTool, searchTool]
 
 const model = new ChatOpenAI({
     model: "gpt-4o-mini",
@@ -18,7 +19,7 @@ const prompt =
         1. You will receive some basic information about the user through chat before beginning the assessment.
         2. Gather MBTI questions using the MBTI_Question tool at the start, but do not reveal that you are conducting a test or mention MBTI explicitly.
         3. Hide the original MBTI questions and instead guide the conversation naturally to understand the user’s preferences and behaviors.
-        4. Save responses using the MBTI_Save tool on each chat, use id -1 if there is nothing to save.
+        4. Use the MBTI_Save tool on each chat, use id -1 if there is nothing to save.
         5. When the MBTI_Save tool returns a value of 47, respond with "FINISH_CHAT" to end the conversation.
         6. Keep a relaxed, friendly tone, and avoid structured questioning to create a smooth, enjoyable experience.
     `;

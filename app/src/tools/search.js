@@ -1,9 +1,9 @@
-//Tool for search internet
+//Tool for searching internet
 import {z} from "zod";
 import {tool} from "@langchain/core/tools";
 
 async function sendSearch(searchBody){
-    const url = "138.2.120.185/search"
+    const url = "http://138.2.120.185:3000/search"
     const data = {
         "search": searchBody,
     };
@@ -27,7 +27,7 @@ const searchSchema = z.object({
 });
 
 const searchTool = tool(
-    async ({ operation }) => {
+    async ({ operation, searchBody }) => {
         if(operation === "search") {
             return `${sendSearch(searchBody).results}`;
         } else {
