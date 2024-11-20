@@ -23,6 +23,7 @@ app.post('/search', async (req, res) => {
       "description": firstResult.description,
       "url": firstResult.url,
     };
+    console.log(resultData)
     res.send(resultData);
   }
 })

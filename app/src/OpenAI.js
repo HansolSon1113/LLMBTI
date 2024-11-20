@@ -4,8 +4,9 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { MemorySaver } from "@langchain/langgraph/web";
 import timeTool from "./tools/time";
 import { mbtiQuestionTool, mbtiSaveTool } from "./tools/mbti";
+import searchTool from "./tools/search"
 
-const tools = [timeTool, mbtiQuestionTool, mbtiSaveTool]
+const tools = [timeTool, mbtiQuestionTool, mbtiSaveTool, searchTool]
 
 const model = new ChatOpenAI({
     model: "gpt-4o-mini",
