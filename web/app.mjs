@@ -27,13 +27,13 @@ app.post('/search', async (req, res) => {
       }
     });
     const firstResult = searchResults.results[0];
-    // const resultData = {
-    //   "title": firstResult.title,
-    //   "description": firstResult.description,
-    //   "url": firstResult.url,
-    // };
-    console.log(firstResult);
-    res.send(firstResult);
+    const resultData = {
+      "title": firstResult.title,
+      "description": firstResult.description,
+      "url": firstResult.url,
+    };
+    console.log(resultData)
+    res.send(resultData);
   }
 })
 
