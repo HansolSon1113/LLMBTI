@@ -16,7 +16,6 @@ async function sendSearch(searchBody){
         body: JSON.stringify(data)
     });
     
-    console.log(response);
     return response.json();
 }
 
@@ -30,7 +29,7 @@ const searchSchema = z.object({
 const searchTool = tool(
     async ({ operation, searchBody }) => {
         if(operation === "search") {
-            return `${sendSearch(searchBody).results}`;
+            return sendSearch(searchBody);
         } else {
             throw new Error("Invalid operation.");
         }
