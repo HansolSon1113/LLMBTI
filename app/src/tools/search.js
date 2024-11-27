@@ -10,6 +10,7 @@ async function sendSearch(searchBody){
 
     const response = await fetch(url, {
         method: "POST",
+        credentials: "include",
         headers: {
             'Content-Type': "application/json"
         },
