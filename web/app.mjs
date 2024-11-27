@@ -5,7 +5,16 @@ const app = express()
 const port = 3000
 app.use(express.json());
 
+var allowCrossDomain = function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+}
+app.use(allowCrossDomain);
+
 app.post('/search', async (req, res) => {
+  console.log(req);
   const searchBody = req.body.search;
   if (searchBody != undefined) {
     const searchResults = await search(searchBody, {
