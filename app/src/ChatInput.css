@@ -1,0 +1,73 @@
+.chat-input-form {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    position: sticky;
+    bottom: 0;
+  }
+  
+  /* 입력 필드 스타일 */
+  .chat-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 1.5rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+  }
+  
+  .chat-input:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+  }
+  
+  .chat-input::placeholder {
+    color: #a0aec0;
+  }
+  
+  /* 전송 버튼 스타일 */
+  .send-button {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+    color: white;
+    border: none;
+    border-radius: 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .send-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .send-button:active {
+    transform: translateY(0);
+  }
+  
+  /* 비활성화된 버튼 스타일 */
+  .send-button:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  /* 반응형 디자인 */
+  @media (max-width: 640px) {
+    .chat-input-form {
+      padding: 0.75rem;
+    }
+    
+    .chat-input {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.9rem;
+    }
+    
+    .send-button {
+      padding: 0.6rem 1rem;
+    }
+  }
