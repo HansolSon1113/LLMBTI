@@ -1,6 +1,9 @@
 import Invoke from "./OpenAI"
 import ChatInput from "./ChatInput";
 import "./App.css";
+import mbtiDatabase from "./tools/mbti";
+
+const mbtiDB = new mbtiDatabase();
 
 function App() {
   return (
@@ -13,7 +16,11 @@ function App() {
 }
 
 async function Submit(message) {
-    const result = await Invoke(message);
+    const config = {
+      thread_id: "test",
+      db: mbtiDB
+    };
+    const result = await Invoke(message, config);
 
     let div = document.createElement('div');
     let text = document.createTextNode(result);
