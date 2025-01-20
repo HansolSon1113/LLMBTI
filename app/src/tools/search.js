@@ -38,6 +38,7 @@ const searchTool = tool(
         name: "Search",
         description: "Search the internet.",
         schema: searchSchema,
+        strict: true,
     }
 );
 

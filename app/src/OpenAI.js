@@ -9,11 +9,13 @@ import searchTool from "./tools/search"
 const tools = [timeTool, searchTool, userInfoTool]
 const toolNode = new ToolNode(tools);
 
+//모델 설정
 const model = new ChatOpenAI({
   model: "gpt-4o-mini", //json_schema result_format 지원 모델 필요
   apiKey: process.env.REACT_APP_OPENAI_API_KEY,   //Value should be in /.env
-}).bindTools(tools);
+});
 
+//메모리(thread_id로 구분 가능)
 const checkpointer = new MemorySaver();
 
 function shouldContinue({ messages }) {
@@ -25,6 +27,7 @@ function shouldContinue({ messages }) {
   return "__end__";
 }
 
+//AI로부터 반환받을 형식
 const mbtiDataSchema = {
   "name": "mbti_data",
   "schema": {
@@ -85,8 +88,11 @@ const mbtiDataSchema = {
 
 const prompt =
   `
-        당신은 사용자의 친구입니다.  
+        당신은 사용자의 친구입니다.
+        필요하다면 도구를 사용해 추가적인 정보를 가져올 수 있습니다.
         사용자의 정보는 "User_Info" 도구를 사용해 가져올 수 있습니다.
+        "Time" 도구를 활용해 현재 시간을 가져올 수 있습니다.
+        기타 정보는 "Search" 도구를 활용해 검색할 수 있습니다.
     `;
 
 const mbtiSystemPrompt =
@@ -115,15 +121,18 @@ const mbtiHumanPrompt =
         감지되지 않은 특성도 빠짐없이 있어야하며 이때는 0으로 처리합니다.
     `
 
-//시스템 템플릿을 사용해 사용자의 채팅에 대한 답변 생성 후 두 mbti 프롬프트를 통해 결과 추출
-const chat = async (state, config) => {
-  const mbtiDB = config["configurable"]["db"];
-
+const chat = async (state) => {
   const templateResponse = await model.invoke([
     { role: "system", content: prompt },
     ...state.messages,
   ]);
+  return { messages: [templateResponse] };
+};
+
+const mbti = async (state, config) => {
   const lastUserMessage = state.messages[state.messages.length - 1];
+  const mbtiDB = config["configurable"]["db"];
+
   const mbtiResponse = await model.invoke([
     { role: "system", content: mbtiSystemPrompt },
     lastUserMessage,
@@ -138,15 +147,17 @@ const chat = async (state, config) => {
   const mbtiOutput = JSON.parse(mbtiResponse.content);
 
   mbtiDB.Update(mbtiOutput);
-  return { messages: [templateResponse] };
-}
+};
 
+//Langgraph graph
 const workflow = new StateGraph(MessagesAnnotation)
+  .addNode("mbti", mbti)
   .addNode("chat", chat)
   .addNode("tools", toolNode)
-  .addEdge("__start__", "chat")
+  .addEdge("__start__", "mbti")
+  .addEdge("mbti", "chat")
   .addEdge("tools", "chat")
-  .addConditionalEdges("chat", shouldContinue)
+  .addConditionalEdges("chat", shouldContinue);
 
 const graph = workflow.compile({ checkpointer });
 
