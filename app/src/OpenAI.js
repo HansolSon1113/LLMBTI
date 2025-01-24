@@ -192,8 +192,7 @@ const chat = async (state) => {
         break
     }
   });
-  console.log(chatPrompt + toolResult);
-
+  
   const chatResponse = await model.invoke([
     { role: "system", content: chatPrompt + toolResult, },
     ...state.messages,
