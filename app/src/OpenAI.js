@@ -1,13 +1,9 @@
 //Handling OpenAI API
 import { ChatOpenAI } from "@langchain/openai";
-import { ToolNode } from "@langchain/langgraph/prebuilt"
 import { StateGraph, MessagesAnnotation, MemorySaver } from "@langchain/langgraph/web"
 import timeTool from "./tools/time";
-import { userInfoTool } from "./tools/userdata"
+import userInfoTool from "./tools/userdata"
 import searchTool from "./tools/search"
-
-const tools = [timeTool, searchTool, userInfoTool]
-const toolNode = new ToolNode(tools);
 
 //모델 설정
 const model = new ChatOpenAI({
@@ -17,15 +13,6 @@ const model = new ChatOpenAI({
 
 //메모리(thread_id로 구분 가능)
 const checkpointer = new MemorySaver();
-
-function shouldContinue({ messages }) {
-  const lastMessage = messages[messages.length - 1];
-  if (lastMessage.additional_kwargs.tool_calls) {
-    return "tools";
-  }
-
-  return "__end__";
-}
 
 //AI로부터 반환받을 형식
 const mbtiDataSchema = {
@@ -86,14 +73,50 @@ const mbtiDataSchema = {
   "strict": true
 }
 
-const prompt =
+const toolSchema = {
+  "name": "chat_structure",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "tools": {
+        "type": "array",
+        "description": "List of tools which cannot be empty, contain timeTool, userInfoTool, or searchTool.",
+        "items": {
+          "type": "string",
+          "enum": [
+            "none",
+            "timeTool",
+            "userInfoTool",
+            "searchTool"
+          ]
+        }
+      },
+      "search": {
+        "type": "string",
+        "description": "Thing to search or key of user data('Age', 'Job', 'Country', 'Interest').",
+      }
+    },
+    "required": [
+      "tools",
+      "search"
+    ],
+    "additionalProperties": false
+  },
+  "strict": true
+}
+
+const toolPrompt =
   `
-        당신은 사용자의 친구입니다.
-        필요하다면 도구를 사용해 추가적인 정보를 가져올 수 있습니다.
-        사용자의 정보는 "User_Info" 도구를 사용해 가져올 수 있습니다.
-        "Time" 도구를 활용해 현재 시간을 가져올 수 있습니다.
-        기타 정보는 "Search" 도구를 활용해 검색할 수 있습니다.
+        당신은 사용자의 친구입니다. 
+        직접 답할 수 없는 경우, 도구를 호출하여 정보를 반환하세요.
     `;
+
+const chatPrompt =
+  `
+        당신은 사용자의 친구입니다. 
+        도구의 응답이 존재한다면 활용하여 답변하세요.
+        도구의 응답:
+`;
 
 const mbtiSystemPrompt =
   `
@@ -121,14 +144,6 @@ const mbtiHumanPrompt =
         감지되지 않은 특성도 빠짐없이 있어야하며 이때는 0으로 처리합니다.
     `
 
-const chat = async (state) => {
-  const templateResponse = await model.invoke([
-    { role: "system", content: prompt },
-    ...state.messages,
-  ]);
-  return { messages: [templateResponse] };
-};
-
 const mbti = async (state, config) => {
   const lastUserMessage = state.messages[state.messages.length - 1];
   const mbtiDB = config["configurable"]["db"];
@@ -149,15 +164,51 @@ const mbti = async (state, config) => {
   mbtiDB.Update(mbtiOutput);
 };
 
+const chat = async (state) => {
+  const toolResponse = await model.invoke([
+    { role: "system", content: toolPrompt },
+    ...state.messages,],
+    {
+      response_format: {
+        type: "json_schema",
+        json_schema: toolSchema
+      }
+    });
+  const output = JSON.parse(toolResponse.content);
+  const toolCalls = output.tools;
+  const search = output.search;
+
+  const toolResult = []
+  toolCalls.forEach((tool) => {
+    switch (tool) {
+      case "timeTool":
+        toolResult.push(timeTool());
+        break
+      case "userInfoTool":
+        toolResult.push(userInfoTool(search));
+        break
+      case "searchTool":
+        toolResult.push(searchTool(search));
+        break
+    }
+  });
+  console.log(chatPrompt + toolResult);
+
+  const chatResponse = await model.invoke([
+    { role: "system", content: chatPrompt + toolResult, },
+    ...state.messages,
+  ]);
+
+  return { messages: [chatResponse] };
+};
+
 //Langgraph graph
 const workflow = new StateGraph(MessagesAnnotation)
   .addNode("mbti", mbti)
   .addNode("chat", chat)
-  .addNode("tools", toolNode)
   .addEdge("__start__", "mbti")
   .addEdge("mbti", "chat")
-  .addEdge("tools", "chat")
-  .addConditionalEdges("chat", shouldContinue);
+  .addEdge("chat", "__end__")
 
 const graph = workflow.compile({ checkpointer });
 
