@@ -22,7 +22,7 @@ app.post('/search', async (req, res) => {
     }, {
       uri_modifier: (rawUrl) => {
         const url = new URL(rawUrl);
-        //url.searchParams.delete("ss_mkt");  // remove the parameter to avoid anomalies
+        url.searchParams.delete("ss_mkt");  // remove the parameter to avoid anomalies
         return url.toString();
       }
     });
