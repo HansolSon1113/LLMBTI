@@ -7,7 +7,7 @@ import searchTool from "./tools/search"
 
 //모델 설정
 const model = new ChatOpenAI({
-  model: "gpt-4o-mini", //json_schema result_format 지원 모델 필요
+  model: "gpt-4o", //json_schema result_format 지원 모델 필요
   apiKey: process.env.REACT_APP_OPENAI_API_KEY,   //Value should be in /.env
 });
 
@@ -192,7 +192,7 @@ const chat = async (state) => {
         break
     }
   });
-  
+
   const chatResponse = await model.invoke([
     { role: "system", content: chatPrompt + toolResult, },
     ...state.messages,
