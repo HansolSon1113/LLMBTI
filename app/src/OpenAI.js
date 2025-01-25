@@ -80,11 +80,11 @@ const toolSchema = {
     "properties": {
       "tools": {
         "type": "array",
-        "description": "List of tools which cannot be empty, contain timeTool, userInfoTool, or searchTool.",
+        "description": 'List of tools to call. Cannot be empty, use "" if nothing to call.',
         "items": {
           "type": "string",
           "enum": [
-            "none",
+            "",
             "timeTool",
             "userInfoTool",
             "searchTool"
@@ -92,13 +92,30 @@ const toolSchema = {
         }
       },
       "search": {
-        "type": "string",
-        "description": "Thing to search or key of user data('Age', 'Job', 'Country', 'Interest').",
+        "type": "array",
+        "description": 'List of keywords to search.',
+        "items": {
+          "type": "string"
+        }
+      },
+      "userData": {
+        "type": "array",
+        "description": 'List of user data keys to fetch.',
+        "items": {
+          "type": "string",
+          "enum": [
+            "Age",
+            "Job",
+            "Country",
+            "Interest"
+          ]
+        }
       }
     },
     "required": [
       "tools",
-      "search"
+      "search",
+      "userData"
     ],
     "additionalProperties": false
   },
@@ -109,6 +126,8 @@ const toolPrompt =
   `
         당신은 사용자의 친구입니다. 
         직접 답할 수 없는 경우, 도구를 호출하여 정보를 반환하세요.
+        도구 여러개를 호출하거나 여러 검색, 유저 정보 가져오기를 한번에 할 수 있습니다.
+        단 tools에는 중복이 없어야 합니다.
     `;
 
 const chatPrompt =
@@ -128,18 +147,6 @@ const mbtiHumanPrompt =
   `
         직전 대화는 사용자와 친구의 대화입니다. 
         당신은 사용자의 대화에서 Sociable, Curious, Empathetic, Active, Persistent, Emotional, Planful, Reflective, Creative에 해당하는 정도를 추출해야 합니다.
-        각 특성을 key로 가지는 "mbtiData"라는 JSON Object로 다음과 같은 형식으로 응답하십시오:
-        {
-            "Sociable" : 0,
-            "Curious" : 0,
-            "Empathetic" : 0,
-            "Active" : 0,
-            "Persistent" : 0,
-            "Emotional" : 0,
-            "Planful" : 0,
-            "Reflective" : 0,
-            "Creative" : 0,
-        }
         감지된 특성을 -2~2중 정수형으로 평가합니다.
         감지되지 않은 특성도 빠짐없이 있어야하며 이때는 0으로 처리합니다.
     `
@@ -164,6 +171,33 @@ const mbti = async (state, config) => {
   mbtiDB.Update(mbtiOutput);
 };
 
+//도구 실행
+function toolExecution(toolCalls, userData, search) {
+  const promises = toolCalls.flatMap((tool) => {
+    switch (tool) {
+      case "timeTool":
+        return [timeTool()];
+        
+      case "userInfoTool":
+        // userData 배열의 모든 항목에 대해 userInfoTool 실행
+        return userData
+          .filter((key) => key && key.trim() !== "")
+          .map((key) => userInfoTool(key));
+        
+      case "searchTool":
+        // search 배열의 모든 항목에 대해 searchTool 실행
+        return search
+          .filter((query) => query && query.trim() !== "")
+          .map((query) => searchTool(query));
+        
+      default:
+        return [];
+    }
+  });
+
+  return Promise.all(promises);
+}
+
 const chat = async (state) => {
   const toolResponse = await model.invoke([
     { role: "system", content: toolPrompt },
@@ -177,21 +211,9 @@ const chat = async (state) => {
   const output = JSON.parse(toolResponse.content);
   const toolCalls = output.tools;
   const search = output.search;
+  const userData = output.userData;
 
-  const toolResult = []
-  toolCalls.forEach((tool) => {
-    switch (tool) {
-      case "timeTool":
-        toolResult.push(timeTool());
-        break
-      case "userInfoTool":
-        toolResult.push(userInfoTool(search));
-        break
-      case "searchTool":
-        toolResult.push(searchTool(search));
-        break
-    }
-  });
+  const toolResult = await toolExecution(toolCalls, userData, search);
 
   const chatResponse = await model.invoke([
     { role: "system", content: chatPrompt + toolResult, },

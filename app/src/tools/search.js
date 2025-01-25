@@ -1,22 +1,15 @@
-async function sendSearch(searchBody){
-    const url = "http://138.2.120.185:3000/search"
-    const data = {
-        "search": searchBody,
-    };
+import { TavilySearchAPIRetriever } from "@langchain/community/retrievers/tavily_search_api";
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            'Content-Type': "application/json"
-        },
-        body: JSON.stringify(data)
-    });
-    
-    return response.json();
-}
+const retriever = new TavilySearchAPIRetriever({
+  k: 2,
+  apiKey: process.env.REACT_APP_TRAVILY_API_KEY
+});
 
-function searchTool(searchBody){
-    return sendSearch(searchBody);
+async function searchTool(searchBody){
+    const response = await retriever.invoke(searchBody);
+    const pageContents = response.map((item) => item.pageContent);
+
+    return pageContents;
 }
 
 export default searchTool;
