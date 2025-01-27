@@ -11,13 +11,12 @@ class mbtiDatabase {
             "Reflective": 0,
             "Creative": 0,
         };
-        this.cnt = 0;
+        this.alpha = 0.4;
     }
 
     Update(mbtiData) {
-        this.cnt++;
         for (let key in mbtiData) {
-            this.data[key] += mbtiData[key];
+            this.data[key] = (1 - this.alpha) * this.data[key] + this.alpha * mbtiData[key]; //EMA
         }
         console.log(this.data);
         console.log(this.Result());
@@ -25,7 +24,6 @@ class mbtiDatabase {
 
     Result() {
         const dimensions = {
-            //작을수록 앞, 클수록 뒤
             "IE": ["Sociable", "Active"],
             "SN": ["Curious", "Reflective", "Creative"],
             "FT": ["Empathetic", "Emotional", "Reflective"],
@@ -35,31 +33,15 @@ class mbtiDatabase {
         const results = Object.fromEntries(
             Object.entries(dimensions).map(([key, keys]) => [
                 key,
-                keys.reduce((sum, k) => sum + (this.data[k] || 0) / this.cnt, 0)
+                keys.reduce((sum, k) => sum + this.data[k], 0) / keys.length
             ])
         );
 
-        let MBTI = {}
-        if (dimensions["IE"] >= 4) {
-            MBTI["IE"] = "E"
-        } else {
-            MBTI["IE"] = "I"
-        }
-        if (dimensions["SN"] >= 2) {
-            MBTI["SN"] = "N"
-        } else {
-            MBTI["SN"] = "S"
-        }
-        if (dimensions["FT"] >= 3) {
-            MBTI["FT"] = "T"
-        } else {
-            MBTI["FT"] = "F"
-        }
-        if (dimensions["PJ"] >= 1) {
-            MBTI["PJ"] = "J"
-        } else {
-            MBTI["PJ"] = "P"
-        }
+        let MBTI = {};
+        MBTI["IE"] = results["IE"] >= 1.5 ? "E" : "I";
+        MBTI["SN"] = results["SN"] >= 0.6 ? "N" : "S";
+        MBTI["FT"] = results["FT"] >= 0.2 ? "T" : "F";
+        MBTI["PJ"] = results["PJ"] >= 1 ? "J" : "P";
 
         return { "Value": results, "Result": MBTI };
     }
