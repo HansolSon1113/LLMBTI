@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Invoke from "./OpenAI";
 import ChatInput from "./ChatInput";
 import "./App.css";
+import mbtiDatabase from "./tools/mbti";
+
+const mbtiDB = new mbtiDatabase();
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -19,7 +22,11 @@ function App() {
       }]);
 
       // AI 응답
-      const result = await Invoke(message);
+      const config = {
+        thread_id: "test",
+        db: mbtiDB
+      };
+      const result = await Invoke(message, config);
       
       // 앱에 AI 메시지 넣기
       setMessages(prev => [...prev, {

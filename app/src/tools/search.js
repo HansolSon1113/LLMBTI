@@ -1,44 +1,15 @@
-//Tool for searching internet
-import {z} from "zod";
-import {tool} from "@langchain/core/tools";
+import { TavilySearchAPIRetriever } from "@langchain/community/retrievers/tavily_search_api";
 
-async function sendSearch(searchBody){
-    const url = "http://138.2.120.185:3000/search"
-    const data = {
-        "search": searchBody,
-    };
-
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            'Content-Type': "application/json"
-        },
-        body: JSON.stringify(data)
-    });
-    
-    return response.json();
-}
-
-const searchSchema = z.object({
-    operation: z
-        .enum(["search"])
-        .describe("Search the internet."),
-    searchBody: z.string().describe("Thing to search.")
+const retriever = new TavilySearchAPIRetriever({
+  k: 2,
+  apiKey: process.env.REACT_APP_TRAVILY_API_KEY
 });
 
-const searchTool = tool(
-    async ({ operation, searchBody }) => {
-        if(operation === "search") {
-            return sendSearch(searchBody);
-        } else {
-            throw new Error("Invalid operation.");
-        }
-    },
-    {
-        name: "Search",
-        description: "Search the internet.",
-        schema: searchSchema,
-    }
-);
+async function searchTool(searchBody){
+    const response = await retriever.invoke(searchBody);
+    const pageContents = response.map((item) => item.pageContent);
+
+    return pageContents;
+}
 
 export default searchTool;
