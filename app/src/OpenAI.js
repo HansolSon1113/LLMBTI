@@ -147,7 +147,7 @@ const mbtiHumanPrompt =
   `
         직전 대화는 사용자와 친구의 대화입니다. 
         당신은 사용자의 대화에서 Sociable, Curious, Empathetic, Active, Persistent, Emotional, Planful, Reflective, Creative에 해당하는 정도를 추출해야 합니다.
-        감지된 특성을 -2~2중 정수형으로 평가합니다.
+        감지된 특성을 -2(매우 낮음), -1(다소 낮음), 0, 1(다소 높음), 2(매우 높음)중 정수형으로 평가합니다.
         감지되지 않은 특성도 빠짐없이 있어야하며 이때는 0으로 처리합니다.
     `
 
@@ -179,13 +179,13 @@ function toolExecution(toolCalls, userData, search) {
         return [timeTool()];
         
       case "userInfoTool":
-        // userData 배열의 모든 항목에 대해 userInfoTool 실행
+        //userData 배열의 모든 항목에 대해 userInfoTool 실행
         return userData
           .filter((key) => key && key.trim() !== "")
           .map((key) => userInfoTool(key));
         
       case "searchTool":
-        // search 배열의 모든 항목에 대해 searchTool 실행
+        //search 배열의 모든 항목에 대해 searchTool 실행
         return search
           .filter((query) => query && query.trim() !== "")
           .map((query) => searchTool(query));
@@ -199,6 +199,7 @@ function toolExecution(toolCalls, userData, search) {
 }
 
 const chat = async (state) => {
+  //호출할 도구 반환
   const toolResponse = await model.invoke([
     { role: "system", content: toolPrompt },
     ...state.messages,],
@@ -213,8 +214,10 @@ const chat = async (state) => {
   const search = output.search;
   const userData = output.userData;
 
+  //도구 실행후 결과 반환
   const toolResult = await toolExecution(toolCalls, userData, search);
 
+  //도구의 결과를 반영해 결과 생성
   const chatResponse = await model.invoke([
     { role: "system", content: chatPrompt + toolResult, },
     ...state.messages,
