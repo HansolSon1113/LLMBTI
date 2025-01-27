@@ -39,7 +39,7 @@ class mbtiDatabase {
             ])
         );
 
-        MBTI = {}
+        let MBTI = {}
         if (dimensions["IE"] >= 4) {
             MBTI["IE"] = "E"
         } else {
