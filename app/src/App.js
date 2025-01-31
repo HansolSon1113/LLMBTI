@@ -1,14 +1,41 @@
 import React, { useState } from 'react';
 import Invoke from "./OpenAI";
 import ChatInput from "./ChatInput";
+import UserdataInput from './UserdataInput'
 import "./App.css";
 import mbtiDatabase from "./tools/mbti";
+import userInfoTool, { setUserData } from "./tools/userdata";
 
 const mbtiDB = new mbtiDatabase();
 
 function App() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUserInfoSubmitted, setIsUserInfoSubmitted] = useState(false);
+  const [userData, setUserDataState] = useState({
+    Age: '',
+    Job: '',
+    Country: '',
+    Interest: ''
+  });
+
+   // 사용자 정보를 수정
+   const handleUserDataChange = (e) => {
+    const { name, value } = e.target;
+    setUserDataState(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmitUserInfo = () => {
+    setUserData(userData); 
+    setIsUserInfoSubmitted(true);
+  };
+
+  const getUserInfo = (key) => {
+    return userInfoTool(key);
+  };
 
   const handleSubmit = async (message) => {
     try {
@@ -24,7 +51,8 @@ function App() {
       // AI 응답
       const config = {
         thread_id: "test",
-        db: mbtiDB
+        db: mbtiDB,
+        userInfo: userInfoTool 
       };
       const result = await Invoke(message, config);
       
@@ -48,6 +76,17 @@ function App() {
     }
   };
 
+  // 유저 정보 작성
+  if (!isUserInfoSubmitted) {
+    return (
+      <UserdataInput
+          userData={userData}
+          handleUserDataChange={handleUserDataChange}
+          handleSubmitUserInfo={handleSubmitUserInfo}
+      />
+    )
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="p-4 bg-gray-800 text-white">
@@ -66,14 +105,13 @@ function App() {
                 : 'bg-gray-100'
             }`}
           >
-            {/* 추후에 user을 넣으면 You 대신에 사용자 이름 변수 넣기 */}
             <div className={`message ${msg.type}`}>
               <div className="message-meta">
                 {msg.type === 'user' ? 'You' : 'AI'}
-            </div>
-            <div className="message-content">
-              {msg.content}
-            </div>
+              </div>
+              <div className="message-content">
+                {msg.content}
+              </div>
               <div className="timestamp">
                 {new Date(msg.timestamp).toLocaleTimeString()}
               </div>
